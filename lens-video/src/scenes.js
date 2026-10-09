@@ -68,7 +68,7 @@ function card(c, u, cfg, draw) {
 function bullets(c, u, arr, times, active) {
   arr.forEach((s, i) => {
     const a = E.out(seg(u, times[i], .5)); if (a <= 0) return;
-    const y = 1450 + i * 62, on = active == null || active === i;
+    const y = 1440 + i * 58, on = active == null || active === i;
     c.save(); c.globalAlpha *= a; c.translate((1 - a) * 50, 0);
     c.fillStyle = on ? C.gold : 'rgba(245,184,46,.35)'; c.beginPath(); c.arc(SAFE.x1 - 10, y - 12, 9, 0, 7); c.fill();
     txt(c, s, SAFE.x1 - 40, y, { size: 35, weight: 700, rtl: true, align: 'right', color: on ? '#fff' : 'rgba(255,255,255,.5)' });
@@ -79,14 +79,24 @@ function quote(c, u, s, t0, sub) {
   const a = E.out(seg(u, t0, .6)); if (a <= 0) return;
   c.save(); c.globalAlpha *= a; c.translate(0, (1 - a) * 30);
   const lines = wrap(c, s, 46, 900, 790);
-  c.fillStyle = C.gold; c.fillRect(SAFE.x1 - 6, 1408, 6, lines.length * 60 + (sub ? 56 : 0) - 6);
-  lines.forEach((l, i) => txt(c, l, SAFE.x1 - 30, 1452 + i * 60, { size: 46, weight: 900, rtl: true, align: 'right' }));
-  if (sub) wrap(c, sub, 29, 700, 800).forEach((l, i) => txt(c, l, SAFE.x1 - 30, 1452 + lines.length * 60 + 4 + i * 38, { size: 29, weight: 700, rtl: true, align: 'right', color: C.dim }));
+  c.fillStyle = C.gold; c.fillRect(SAFE.x1 - 6, 1398, 6, lines.length * 60 + (sub ? 56 : 0) - 6);
+  lines.forEach((l, i) => txt(c, l, SAFE.x1 - 30, 1442 + i * 60, { size: 46, weight: 900, rtl: true, align: 'right' }));
+  if (sub) wrap(c, sub, 29, 700, 800).forEach((l, i) => txt(c, l, SAFE.x1 - 30, 1442 + lines.length * 60 + 4 + i * 38, { size: 29, weight: 700, rtl: true, align: 'right', color: C.dim }));
   c.restore();
 }
-function foot(c, u, s, t0 = 3.4) {
-  const a = E.out(seg(u, t0, .8)); if (a <= 0) return;
-  txt(c, s, 540, 1616, { size: fit(c, s, 23, 400, 864), weight: 400, rtl: true, color: 'rgba(242,244,248,.55)', alpha: a });
+function foot(c, u, str, t0 = 3.4) {
+  const a = E.out(seg(u, t0, .7)); if (a <= 0.001) return;
+  const size = fit(c, str, 25, 700, 790), w = tw(c, str, size, 700) + 70, h = 42, x = 540 - w / 2, y = 1588;
+  c.save(); c.globalAlpha *= a; c.translate(0, (1 - a) * 26);
+  rr(c, x, y, w, h, h / 2); c.fillStyle = 'rgba(8,10,14,.94)'; c.fill();
+  c.save(); rr(c, x, y, w, h, h / 2); c.clip();                                   // one-shot light sweep
+  const sw = E.io(seg(u, t0 + .35, 1.0)); const gx = x - 120 + (w + 240) * sw;
+  const g = c.createLinearGradient(gx - 60, 0, gx + 60, 0); g.addColorStop(0, 'rgba(245,184,46,0)'); g.addColorStop(.5, 'rgba(245,184,46,.38)'); g.addColorStop(1, 'rgba(245,184,46,0)');
+  c.fillStyle = g; c.fillRect(x, y, w, h); c.restore();
+  rr(c, x, y, w, h, h / 2); c.strokeStyle = 'rgba(245,184,46,.75)'; c.lineWidth = 2; c.stroke();
+  c.fillStyle = C.gold; c.beginPath(); c.arc(x + w - 24, y + h / 2, 6, 0, 7); c.fill();
+  txt(c, str, x + w - 42, y + h / 2 + size * .33, { size, weight: 700, rtl: true, align: 'right', color: 'rgba(255,255,255,.95)' });
+  c.restore();
 }
 function catScene(cfg, drawCard, extra) {
   return (c, u, sc) => {
@@ -271,7 +281,7 @@ SCENES.ultrawide = catScene(CFG.ultrawide, (c, u, w, h, sc) => {
 }, (c, u, sc) => quote(c, u, 'للمعمار والمناظر الطبيعية والمساحات الضيقة', sc.quote));
 
 // ───────────────────────── Scene 4: wide & standard ─────────────────────────
-CFG.wide = { en: 'WIDE & STANDARD LENSES', ar: 'الزاوية المتوسطة والقياسية', lenses: ['w24', 'w35', 's50'], sel: 1, foot: 'الكاميرا ثابتة في مكانها · زوايا الرؤية لمستشعر Full Frame · 50mm ليست مطابقة تمامًا لعين الإنسان' };
+CFG.wide = { en: 'WIDE & STANDARD LENSES', ar: 'الزاوية المتوسطة والقياسية', lenses: ['w24', 'w35', 's50'], sel: 1, foot: 'الكاميرا ثابتة · الزوايا لمستشعر Full Frame · 50mm ≠ عين الإنسان تمامًا' };
 SCENES.wide = catScene(CFG.wide, (c, u, w, h, sc) => {
   skyGrad(c, w, h, '#1b2a45', '#52709a', '#efbd7e');
   buildingRow(c, -20, w + 40, 370, 5, 150, 330, ['#2a3a5c', '#3b4d73', '#233150', '#4a5e86']);
@@ -302,7 +312,7 @@ SCENES.wide = catScene(CFG.wide, (c, u, w, h, sc) => {
 });
 
 // ───────────────────────── Scene 5: portrait ─────────────────────────
-CFG.portrait = { en: 'PORTRAIT · SHORT TELEPHOTO', ar: 'عدسات البورتريه', lenses: ['p85', 'p105', 'p135'], sel: 0, foot: 'العزل يعتمد أيضًا على فتحة العدسة ومسافة التصوير والمسافة بين الشخص والخلفية' };
+CFG.portrait = { en: 'PORTRAIT · SHORT TELEPHOTO', ar: 'عدسات البورتريه', lenses: ['p85', 'p105', 'p135'], sel: 0, foot: 'العزل يعتمد أيضًا على الفتحة ومسافة التصوير وبُعد الخلفية' };
 const BOKEH = (() => { const R = rng(21), a = []; for (let i = 0; i < 46; i++) a.push({ x: R() * 864, y: 40 + R() * 250, r: 22 + R() * 16, c: [[255, 214, 140], [255, 240, 200], [150, 230, 220], [255, 170, 130]][Math.floor(R() * 4)] }); return a; })();
 function portraitCard(c, u, w, h, sc) {
   const b = fx(u, sc);
@@ -341,14 +351,16 @@ function portraitCard(c, u, w, h, sc) {
 SCENES.portrait = catScene(CFG.portrait, portraitCard, (c, u, sc) => {
   quote(c, u, 'عدسات مثالية لعزل الخلفية وتصوير البورتريه', sc.quote);
   ['فتحة واسعة f/1.8', 'اقترب من الموضوع', 'ابعد الخلفية'].forEach((s, i) => {
-    const a = E.out(seg(u, sc.chips[i], .5)); if (a <= 0) return; const cw = 262, x = SAFE.x1 - (i + 1) * cw - i * 40 + 0;
-    c.save(); c.globalAlpha *= a; c.translate(0, (1 - a) * 20);
-    pill(c, x + 0, 1556, cw, 52, 'rgba(245,184,46,.12)', 'rgba(245,184,46,.7)'); txt(c, s, x + cw / 2, 1592, { size: 26, rtl: true, color: C.white }); c.restore();
+    const a = E.out(seg(u, sc.chips[i], .5)), pop = E.back(seg(u, sc.chips[i], .6)); if (a <= 0) return; const cw = 262, gap = 39, x = SAFE.x1 - (i + 1) * cw - i * gap, cx = x + cw / 2;
+    c.save(); c.globalAlpha *= a; c.translate(cx, 1546 + (1 - a) * 24); c.scale(.85 + .15 * pop, .85 + .15 * pop);
+    pill(c, -cw / 2, -24, cw, 48, 'rgba(8,10,14,.95)', C.gold); c.lineWidth = 2.5;
+    c.fillStyle = C.gold; c.beginPath(); c.arc(cw / 2 - 18, 0, 5, 0, 7); c.fill();
+    txt(c, s, cw / 2 - 34, 9, { size: fit(c, s, 27, 900, 205), weight: 900, rtl: true, align: 'right', color: '#fff' }); c.restore();
   });
 });
 
 // ───────────────────────── Scene 6: macro ─────────────────────────
-CFG.macro = { en: 'MACRO LENSES', ar: 'عدسات الماكرو', lenses: ['m60', 'm90', 'm100'], sel: 2, foot: 'Macro ليست مجرد تقريب (Zoom): هي عدسات تُركّز من مسافة قريبة جدًا وبتكبير يصل إلى 1:1',
+CFG.macro = { en: 'MACRO LENSES', ar: 'عدسات الماكرو', lenses: ['m60', 'm90', 'm100'], sel: 2, foot: 'Macro ليست مجرد زوم: تركيز من مسافة قريبة جدًا وتكبير حتى 1:1',
   lensState: (u, i) => ({ focus: (i === 2 ? 1 : 0) * (E.io(seg(u, 3.2, 3.8)) * 9) + u * .2 }) };
 function hexFacets(c, R, a) {
   const r = 12, hh = r * Math.sqrt(3) / 2; c.save(); c.beginPath(); c.arc(0, 0, R, 0, 7); c.clip();
