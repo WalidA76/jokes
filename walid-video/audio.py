@@ -81,6 +81,7 @@ add(a(3,K['s4_send']),click(900,.05),.7); add(a(3,K['s4_shift'][0]),hum(1.2),.5)
 for o in K['s5_text']: add(a(4,o),pop(480),.35)
 add(a(4,K['s5_morph']),whoosh(.7),.5)
 for j in range(8): add(a(4,K['s5_morph']+.9+j*.14),click(2500,.015),.25)
+add(a(4,K['s5_swap']),whoosh(.5,False),.6); add(a(4,K['s5_swap'])+.15,ping(1318,.5),.5); add(a(4,K['s5_swap'])+.15,chime(),.4)
 add(a(4,K['s5_play']),pop(700),.7); add(a(4,K['s5_play']),chime(),.5)
 # S6
 for j in range(7): add(a(5,K['s6_words'][0]+j*(K['s6_words'][1]-K['s6_words'][0])/6),pop(420),.3)
