@@ -84,6 +84,7 @@ for j in range(8): add(a(4,K['s5_morph']+.9+j*.14),click(2500,.015),.25)
 add(a(4,K['s5_play']),pop(700),.7); add(a(4,K['s5_play']),chime(),.5)
 # S6
 for j in range(7): add(a(5,K['s6_words'][0]+j*(K['s6_words'][1]-K['s6_words'][0])/6),pop(420),.3)
+for o in K['s6_chips']: add(a(5,o),pop(520),.5)
 add(a(5,K['s6_cta']),pop(600),.6); add(a(5,K['s6_cta']),ping(1568),.4)
 sfx=np.tanh(sfx*1.3)
 # ambient pad

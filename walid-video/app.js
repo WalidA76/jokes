@@ -222,6 +222,7 @@ function u6(lt){
   L6.set(110,lt*6,lt*2);
   const t0=K.s6_words[0],t1=K.s6_words[1];
   w6n.forEach((w,i)=>{const a=lerp(t0,t1,i/(w6n.length-1));rev(w,lt,a,.5,40);});
+  [...$('chips').children].forEach((c,i)=>{const p=eb(pr(lt,K.s6_chips[i],K.s6_chips[i]+.5));c.style.opacity=clamp(p*1.5);c.style.transform=`translateY(${(1-p)*30}px) scale(${lerp(.85,1,p)})`;});
   const c=eb(pr(lt,K.s6_cta,K.s6_cta+.6)); const cta=$('cta'); cta.style.opacity=clamp(c*1.5);cta.style.transform=`scale(${lerp(.85,1,c)})`;
   cta.style.boxShadow=`0 0 ${30+20*Math.sin(lt*4)}px rgba(71,227,195,${.25+.15*Math.sin(lt*4)})`;
   $('pt').style.transform=`translateY(${Math.abs(Math.sin(lt*5))*16}px)`;
