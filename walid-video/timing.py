@@ -2,7 +2,7 @@ import json
 # Scene boundaries snapped to the pauses detected in the voice track (47.6s).
 S = [0.0, 4.2, 10.5, 22.3, 36.1, 41.8, 48.0]
 K = dict(
- s1_shutter=0.25, s1_q=2.4,
+ s1_a=0.7, s1_b=2.3, s1_title=3.0,
  s2_bulb=0.2, s2_morph=1.1, s2_nodes=[1.8,2.7,3.6,4.5], s2_head=5.0,
  s3_card=0.2, s3_type=[0.8,5.2], s3_proc=[5.3,6.0], s3_cards=[6.0,6.55,7.1,7.65,8.2], s3_tag=9.2,
  s4_card=3.6, s4_bracket=4.6, s4_type=[6.4,8.6], s4_send=8.9, s4_shift=[9.1,10.3], s4_text=10.6,

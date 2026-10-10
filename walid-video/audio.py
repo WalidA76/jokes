@@ -36,7 +36,7 @@ def hum(d=1.0):
     t=tt(d); f=200+500*t/d; return np.sin(2*np.pi*np.cumsum(f)/SR)*np.sin(np.pi*t/d)*.25
 a=lambda i,o:S[i]+o
 # S1
-add(a(0,K['s1_shutter']),shutter(),.8); add(a(0,.9),click(1200,.05),.4); add(a(0,K['s1_q'])-.1,whoosh(.6),.5)
+add(a(0,K['s1_a']),shutter(),.8); add(a(0,K['s1_a'])-.2,whoosh(.5),.5); add(a(0,K['s1_b']),shutter(),.8); add(a(0,K['s1_b'])-.2,whoosh(.5),.5); add(a(0,K['s1_title']),pop(480),.4)
 # transitions
 for i in range(1,6): add(S[i]-.25,whoosh(.8),.55)
 # S2

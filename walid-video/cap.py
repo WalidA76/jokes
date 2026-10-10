@@ -1,6 +1,6 @@
 import sys,asyncio
 from playwright.async_api import async_playwright
-k,n=int(sys.argv[1]),int(sys.argv[2]); FPS=30; total=int(48*FPS)
+k,n=int(sys.argv[1]),int(sys.argv[2]); FPS=30; total=int(sys.argv[3]) if len(sys.argv)>3 else int(48*FPS)
 async def main():
     async with async_playwright() as p:
         b=await p.chromium.launch(executable_path='/opt/pw-browsers/chromium-1194/chrome-linux/chrome',args=['--no-sandbox'])
