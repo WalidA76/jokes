@@ -17,6 +17,15 @@ def click(f=1800,d=.03):
 def shutter():
     a=click(2600,.05)*1.0; b=np.zeros(int(.09*SR)); c=click(1500,.07)*.8
     return np.concatenate([a,b,c])
+def key(sp=False):
+    t=tt(.09); f=rng.uniform(120,180)*(.7 if sp else 1)
+    thump=np.sin(2*np.pi*f*t)*np.exp(-t*55)*.9
+    c=rng.normal(0,1,len(t)); c=c-lp(c,.25)   # highpassed noise = key click
+    clk=c*np.exp(-t*(160 if not sp else 110))*rng.uniform(.5,.8)
+    up=np.zeros(len(t)); j=int(.055*SR); u=tt(.02); up[j:j+len(u)]=rng.normal(0,1,len(u))*np.exp(-u*300)*.25
+    return thump+clk+up
+def bloop(f=520):
+    t=tt(.16); return np.sin(2*np.pi*np.cumsum(f*(1+1.2*np.exp(-t*18)))/SR)*np.exp(-t*20)
 def whoosh(d=.7,up=True):
     t=tt(d); n=rng.normal(0,1,len(t)); env=np.sin(np.pi*np.clip(t/d,0,1))**2
     f=np.linspace(.03,.35,len(t)) if up else np.linspace(.35,.03,len(t))
@@ -49,15 +58,24 @@ add(a(1,K['s2_head']),ping(1318,.5),.4)
 # S3
 add(a(2,K['s3_card']),pop(400),.5)
 n=int((K['s3_type'][1]-K['s3_type'][0])*18)
-for j in range(n): add(a(2,K['s3_type'][0])+j/18*F[2]+rng.uniform(-.01,.01),click(rng.choice([1500,1900,2300]),.02),.28)
+for j in range(n): add(a(2,K['s3_type'][0])+j/18*F[2]+rng.uniform(-.01,.01),key(j%9==8),.85)
 add(a(2,K['s3_proc'][0]),click(900,.05),.7); add(a(2,K['s3_proc'][0]),blips(.8),.5)
 for o in K['s3_cards']: add(a(2,o),pop(560),.5)
 add(a(2,K['s3_tag']),chime(),.6)
+# S3 dots + S2 chain dot
+import math
+for i in range(3):
+    k=0
+    while True:
+        lt=(math.pi/2+k*math.pi+.7*i)/9; k+=1
+        if lt>K['s3_cards'][0]+.8: break
+        if lt>=K['s3_proc'][0]: add(a(2,lt),bloop(420+i*110),.55)
+for lt in np.arange(K['s2_nodes'][0],K['s2_nodes'][3]+.4,.2): add(a(1,lt),click(2800,.012),.3)
 # S4
 add(a(3,.25),shutter(),.7); add(a(3,1.8),shutter(),.6); add(a(3,K['s4_card']-.1),whoosh(.6,False),.4)
 add(a(3,K['s4_bracket']),blips(.6),.35)
 n=int((K['s4_type'][1]-K['s4_type'][0])*14)
-for j in range(n): add(a(3,K['s4_type'][0])+j/14*F[3]+rng.uniform(-.01,.01),click(rng.choice([1400,1800,2200]),.02),.28)
+for j in range(n): add(a(3,K['s4_type'][0])+j/14*F[3]+rng.uniform(-.01,.01),key(j%9==8),.85)
 add(a(3,K['s4_send']),click(900,.05),.7); add(a(3,K['s4_shift'][0]),hum(1.2),.5); add(a(3,K['s4_text']),chime(),.5)
 # S5
 for o in K['s5_text']: add(a(4,o),pop(480),.35)
