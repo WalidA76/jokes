@@ -19,3 +19,6 @@ Mix rule: voice loudest (loudnorm -14), SFX x0.22 lowpass 5k, music x0.2 lowpass
 ## Speech sync tool
 `bash setup_asr.sh` once per container (installs sherpa-onnx + Whisper small from GitHub; HuggingFace is blocked).
 Then `python3 transcribe.py voice.mp3` gives phrase text + timestamps. Dialect accuracy is approximate; verify names/brands with the user.
+
+## Silence trimmer
+`python3 trim_silence.py in.mp3 out.wav [--ratio 0.25 --min 0.12 --max 0.30]` shortens long pauses but keeps a small natural breath; out.map.json maps old->new times for rescheduling scenes.
