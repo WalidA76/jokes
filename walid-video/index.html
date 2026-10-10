@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8">
+<title>Behind the Scenes</title>
+<style>
+@font-face{font-family:'Tajawal';font-weight:800;src:url(assets/Tajawal-ExtraBold.ttf)}
+@font-face{font-family:'Tajawal';font-weight:700;src:url(assets/Tajawal-Bold.ttf)}
+@font-face{font-family:'Tajawal';font-weight:500;src:url(assets/Tajawal-Medium.ttf)}
+@font-face{font-family:'JB';font-weight:100 800;src:url(assets/JetBrainsMono.ttf)}
+:root{--gold:#f0bd4a;--teal:#47e3c3;--blue:#2d6cdf}
+html,body{margin:0;background:#000}
+#stage{position:relative;width:1080px;height:1920px;overflow:hidden;direction:rtl;color:#fff;
+ font-family:'Tajawal','Noto Color Emoji',sans-serif;font-weight:800;
+ background:radial-gradient(ellipse at 50% 36%,#171c29 0%,#0c0f16 56%,#07090d 100%)}
+#grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.032) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.032) 1px,transparent 1px);background-size:60px 60px}
+#vig{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,transparent 55%,rgba(0,0,0,.45) 100%);pointer-events:none;z-index:50}
+.scene{position:absolute;inset:0;overflow:hidden}
+.abs{position:absolute}
+.mono{font-family:'JB',monospace;direction:ltr;letter-spacing:.16em;font-weight:600}
+.tag{position:absolute;left:0;right:0;top:250px;text-align:center;color:var(--gold);font-size:27px}
+.gold{color:var(--gold)} .teal{color:var(--teal)}
+.center{position:absolute;left:0;right:0;text-align:center}
+.pill{position:absolute;border-radius:60px;background:rgba(10,13,20,.88);border:2px solid rgba(71,227,195,.55)}
+.card{position:absolute;border-radius:26px;background:linear-gradient(180deg,#171c28,#10141d);border:2px solid rgba(240,189,74,.28);box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.caret{display:inline-block;width:4px;height:1em;background:var(--teal);vertical-align:-0.12em;margin:0 4px}
+svg{overflow:visible}
+</style></head><body>
+<div id="stage">
+ <div id="grid"></div>
+ <svg id="corners" class="abs" width="1080" height="1920" style="left:0;top:0;z-index:40" fill="none" stroke="#f0bd4a" stroke-width="3" stroke-opacity=".6">
+  <path d="M58 108V62H104"/><path d="M1022 108V62H976"/><path d="M58 1812V1858H104"/><path d="M1022 1812V1858H976"/>
+ </svg>
+ <div id="prog" class="abs" style="left:90px;right:90px;top:176px;height:3px;background:rgba(255,255,255,.1);z-index:40;direction:ltr"><div id="progf" style="height:100%;width:0;background:var(--gold)"></div></div>
+
+ <!-- ============ S1 ============ -->
+ <section class="scene" id="sc1">
+  <div class="tag mono" id="t1">BEHIND THE SCENES</div>
+  <svg class="abs" id="guides1" width="1080" height="1920" style="left:0;top:0" fill="none" stroke="rgba(240,189,74,.35)" stroke-width="2">
+   <path pathLength="1" d="M360 380V1020"/><path pathLength="1" d="M720 380V1020"/><path pathLength="1" d="M150 560H930"/><path pathLength="1" d="M150 860H930"/>
+   <g id="xh1" stroke="rgba(240,189,74,.8)"><path d="M520 700h40M540 680v40"/></g>
+  </svg>
+  <div class="abs" id="lens1" style="left:260px;top:420px;width:560px;height:560px"></div>
+  <div class="center" id="h1" style="top:1090px;font-size:88px;line-height:1.25">كيف صنعت هذا<br>الأنيميشن؟ 🎬</div>
+  <div class="center gold" id="q1" style="top:1350px;font-size:62px;line-height:1.3;padding:0 90px">هل تحتاج خبرة كبيرة<br>في الموشن جرافيك؟</div>
+ </section>
+
+ <!-- ============ S2 ============ -->
+ <section class="scene" id="sc2">
+  <div class="tag mono">01 · IDEA</div>
+  <svg class="abs" id="bulb" width="260" height="260" viewBox="-130 -130 260 260" style="left:410px;top:440px" fill="none" stroke-linecap="round">
+   <defs><radialGradient id="glow"><stop offset="0" stop-color="#f0bd4a" stop-opacity=".75"/><stop offset="1" stop-color="#f0bd4a" stop-opacity="0"/></radialGradient></defs>
+   <circle id="bglow" r="125" fill="url(#glow)"/>
+   <g id="rays" stroke="#f0bd4a" stroke-width="7"></g>
+   <path id="bpath" stroke="#f0bd4a" stroke-width="8" d="M-34 52C-34 28 -62 14 -62 -22A62 62 0 0 1 62 -22C62 14 34 28 34 52Z"/>
+   <path stroke="#f0bd4a" stroke-width="8" d="M-28 74H28M-20 94H20"/>
+   <path id="fil" pathLength="1" stroke="#fff" stroke-width="5" d="M-18 52V10L0 -8L18 10V52"/>
+  </svg>
+  <div class="card" id="board" style="left:240px;top:420px;width:600px;height:330px;padding:0">
+   <div id="bframes"></div>
+  </div>
+  <svg class="abs" id="chain" width="1080" height="1920" style="left:0;top:0" fill="none"><path id="chainline" pathLength="1" stroke="rgba(240,189,74,.45)" stroke-width="3" stroke-dasharray="1" d="M540 826V1200"/><circle id="chaindot" r="9" fill="#f0bd4a"/></svg>
+  <div id="nodes"></div>
+  <div class="center" id="h2" style="top:1300px;font-size:76px;line-height:1.3;padding:0 70px">كل شيء يبدأ بفكرة <span class="gold">واضحة!</span></div>
+ </section>
+
+ <!-- ============ S3 ============ -->
+ <section class="scene" id="sc3">
+  <div class="tag mono">02 · AI-ASSISTED PLANNING</div>
+  <div class="card" id="chat" style="left:70px;top:320px;width:940px;height:380px;overflow:hidden">
+   <div class="abs" style="right:0;left:0;top:0;height:104px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:20px;padding:0 34px;direction:ltr">
+    <div style="width:64px;height:64px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center"><svg width="42" height="42" viewBox="0 0 24 24"><path fill="#0a0d14" id="oai"/></svg></div>
+    <div style="font-family:'JB';font-weight:700;font-size:40px;letter-spacing:.02em">ChatGPT</div>
+    <div class="abs mono" style="right:34px;top:38px;font-size:20px;color:#6f7a8f;letter-spacing:.1em">PROMPT</div>
+   </div>
+   <div class="abs" style="left:34px;right:34px;top:130px;border-radius:22px;background:rgba(240,189,74,.09);border:2px solid rgba(240,189,74,.4);padding:22px 28px;min-height:150px;box-sizing:border-box">
+    <div id="typed" style="font-size:38px;line-height:1.5;font-weight:700;direction:rtl;text-align:right"></div>
+   </div>
+   <div id="dots" class="abs" style="left:34px;top:312px;direction:ltr;display:flex;gap:12px"><i style="width:16px;height:16px;border-radius:50%;background:var(--teal);display:block"></i><i style="width:16px;height:16px;border-radius:50%;background:var(--teal);display:block"></i><i style="width:16px;height:16px;border-radius:50%;background:var(--teal);display:block"></i></div>
+   <div id="scan" class="abs" style="top:104px;bottom:0;width:120px;left:0;background:linear-gradient(90deg,transparent,rgba(71,227,195,.28),transparent)"></div>
+  </div>
+  <div id="rows"></div>
+  <div class="center" id="tag3" style="top:1330px;font-size:54px;line-height:1.4;padding:0 70px"><span class="teal">ChatGPT</span> ساعدني أحوّل الفكرة<br>إلى <span class="gold">وصف تنفيذي دقيق.</span></div>
+ </section>
+
+ <!-- ============ S4 ============ -->
+ <section class="scene" id="sc4">
+  <div class="tag mono" id="t4">03 · VISUAL DESIGN</div>
+  <div class="abs" id="lens4" style="left:160px;top:380px;width:760px;height:760px"></div>
+  <div class="card" id="scard" style="left:90px;top:440px;width:900px;height:650px;overflow:hidden;padding:0;border-color:rgba(71,227,195,.35)">
+   <svg id="art" width="900" height="650" viewBox="0 0 900 650" style="overflow:hidden;position:absolute;left:0;top:0"></svg>
+   <div id="cmd" class="abs" style="left:34px;right:34px;bottom:30px;height:92px;border-radius:50px;background:rgba(10,14,18,.94);border:1px solid rgba(255,255,255,.12);direction:ltr">
+    <div class="abs mono" style="left:34px;top:0;line-height:92px;font-size:36px;letter-spacing:0;font-weight:700"><span class="teal">/</span><span id="cmdtxt"></span><span class="caret" id="ccaret"></span></div>
+    <div id="send" class="abs" style="right:14px;top:14px;width:64px;height:64px;border-radius:50%;background:var(--teal);display:flex;align-items:center;justify-content:center"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#0a0d14" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V5M5 12l7-7 7 7"/></svg></div>
+   </div>
+  </div>
+  <div class="center mono" id="cap4" style="top:1118px;font-size:20px;color:#7d889c;letter-spacing:.12em">STYLE SAMPLE · NOT A REAL APP UI</div>
+  <div class="center" id="h4" style="top:1210px;font-size:70px;line-height:1.35;padding:0 60px">من كلمات مكتوبة…<br><span class="gold">إلى مشاهد متحركة!</span></div>
+ </section>
+
+ <!-- ============ S5 ============ -->
+ <section class="scene" id="sc5">
+  <div class="tag mono">04 · RESULT</div>
+  <div class="center" id="l5a" style="top:318px;font-size:58px">الفكرة مني…</div>
+  <div class="center" id="l5b" style="top:398px;font-size:58px">والتخطيط بمساعدة <span class="teal">ChatGPT</span>…</div>
+  <div class="center gold" id="l5c" style="top:478px;font-size:58px">والإبداع في التنفيذ!</div>
+  <div id="persp" class="abs" style="left:0;top:0;width:1080px;height:1920px;perspective:1600px">
+   <div class="abs" id="fr1" style="overflow:hidden;border-radius:26px;border:3px solid rgba(240,189,74,.55);box-shadow:0 30px 70px rgba(0,0,0,.6);background:#000"><img src="assets/ref1_lens.jpg" style="width:100%;height:100%;object-fit:cover;display:block"></div>
+   <div class="abs" id="fr2" style="overflow:hidden;border-radius:26px;border:3px solid rgba(71,227,195,.55);box-shadow:0 30px 70px rgba(0,0,0,.6);background:#000"><img src="assets/ref2_bus.jpg" style="width:100%;height:100%;object-fit:cover;display:block"></div>
+  </div>
+  <div id="tl" class="abs" style="left:0;top:0;width:1080px;height:1920px"></div>
+ </section>
+
+ <!-- ============ S6 ============ -->
+ <section class="scene" id="sc6">
+  <div class="abs" id="lens6" style="left:90px;top:360px;width:900px;height:900px;opacity:.1"></div>
+  <div class="center" id="big6" style="top:470px;font-size:104px;line-height:1.3;padding:0 60px"></div>
+  <div class="pill" id="cta" style="left:90px;width:900px;top:1090px;height:190px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:54px;line-height:1.35;border-color:rgba(71,227,195,.7)">
+   <div>تبي أشاركك طريقة<br>كتابة الوصف؟ <span id="pt" style="display:inline-block">👇</span></div>
+  </div>
+  <div id="sig" class="abs" style="left:60px;top:1545px;direction:ltr;font-family:'DejaVu Sans','Tajawal',sans-serif;font-weight:700;font-size:44px;letter-spacing:.04em;color:rgba(255,255,255,.58)">walidphotoz</div>
+ </section>
+
+ <div id="wring" class="abs" style="left:0;top:0;width:10px;height:10px;border-radius:50%;border:6px solid var(--gold);box-shadow:0 0 40px rgba(240,189,74,.7);z-index:45;opacity:0"></div>
+ <div id="flash" class="abs" style="inset:0;background:#fff;opacity:0;z-index:46"></div>
+ <div id="vig"></div>
+</div>
+<script src="timing.js"></script>
+<script src="app.js"></script>
+</body></html>
