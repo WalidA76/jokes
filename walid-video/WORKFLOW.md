@@ -15,3 +15,7 @@ For every new video, ask the user ONLY these three questions, then build:
 
 Pipeline: timing.py -> index.html/app.js (render(t)) -> cap.py (frames) -> audio.py (SFX/pad) -> ffmpeg mix.
 Mix rule: voice loudest (loudnorm -14), SFX x0.22 lowpass 5k, music x0.2 lowpass 1.2k, both ducked by voice.
+
+## Speech sync tool
+`bash setup_asr.sh` once per container (installs sherpa-onnx + Whisper small from GitHub; HuggingFace is blocked).
+Then `python3 transcribe.py voice.mp3` gives phrase text + timestamps. Dialect accuracy is approximate; verify names/brands with the user.
