@@ -241,7 +241,7 @@ window.render=function(t){
       n.style.clipPath=p>=1?'none':`circle(${r}px at 540px 780px)`; if(p>0&&p<1)ring={r,p};}
     else n.style.clipPath='none';
     const nxt=pr(t,b-.15,b+.65); n.style.filter=nxt>0&&nxt<1?`brightness(${1-.4*nxt})`:'none';
-    U[i](t-a);
+    U[i]((t-a)/TM.F[i]);
   });
   const w=$('wring');
   if(ring){w.style.opacity=1-ring.p*.9;w.style.width=w.style.height=(ring.r*2-12)+'px';w.style.left=(540-ring.r)+'px';w.style.top=(780-ring.r)+'px';}
