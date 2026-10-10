@@ -22,3 +22,13 @@ Then `python3 transcribe.py voice.mp3` gives phrase text + timestamps. Dialect a
 
 ## Silence trimmer
 `python3 trim_silence.py in.mp3 out.wav [--ratio 0.25 --min 0.12 --max 0.30]` shortens long pauses but keeps a small natural breath; out.map.json maps old->new times for rescheduling scenes.
+
+## FIXED STANDARD (approved: v6) — use as the baseline for every new video
+- Audio chain: trim_silence.py defaults (ratio 0.25, min 0.12s, max 0.30s) -> voice cleanup (highpass 80, afftdn, +2dB @3k, compressor 3:1, loudnorm -14).
+- Mix: SFX x0.5 lowpass 9k, ducked 2.5:1 by voice; music pad x0.2 lowpass 1.2k, ducked 12:1. Voice always loudest.
+- SFX set: shutter + whoosh on scene wipes, mechanical keyboard on every typing animation, bloop per bouncing dot, pop per card/chip, chime on key reveals, downward whoosh + ping on music swap.
+- Timing: transcribe with the speech-sync tool (Whisper medium for final pass), set scene boundaries S[] on the trimmed voice, scenes stretch by F[i] = new/old duration.
+- Timeline scene design: labeled VIDEO/VOICE/MUSIC/FX tracks, music swap gold->blue with "تغيير الموسيقى" tag, play button below.
+- Intro: show the user's reference clips (Image 1 then Image 2) while they are named in the narration.
+- Safe zone: text inside y 250–1480, x 70–1010 (9:16).
+Git tag: v6-approved
