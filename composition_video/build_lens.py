@@ -403,10 +403,15 @@ def synth(path):
         for _ in range(3): nz = np.convolve(nz, np.ones(24) / 24, 'same')
         return nz * np.sin(np.pi * t2 / d) ** 2 * 4
     def shutter():
-        m = int(.2 * sr); t2 = np.arange(m) / sr; s = np.zeros(m)
-        for o in (0, .055):
-            s += (t2 >= o) * np.diff(rng.standard_normal(m + 1))[:m] * np.exp(-(t2 - o) / .012)
-        return s * .18
+        # DSLR-style: mirror slap (low thump) then two sharp curtain clicks
+        m = int(.34 * sr); t2 = np.arange(m) / sr; s = np.zeros(m)
+        s += np.sin(2 * np.pi * 150 * t2) * np.exp(-t2 / .02) * .9
+        for o, g in ((0.0, 1.0), (.075, .75)):
+            mk = t2 >= o
+            nz = np.diff(rng.standard_normal(m + 1))[:m]
+            s += mk * nz * np.exp(-(t2 - o) / .006) * g * .9
+            s += mk * np.sin(2 * np.pi * 2600 * (t2 - o)) * np.exp(-(t2 - o) / .01) * g * .35
+        return s * .55
     t = 6.0
     while t < DUR - 3:
         lvl = 1.0 if t < DUR - 6 else .6
@@ -418,12 +423,13 @@ def synth(path):
     for e in (10, 25, 45, 60, 74): add(e - .25, whoosh(.6), .45)
     for tm in (11.6, 12.5, 14.2, 7.0 + 10 + 1.5 * 0, 18, 19.5, 21, 22.5): add(tm, tick(1400, .05), .07)
     add(35.0, tick(1300, .05), .07); add(29.5, tick(1300, .05), .07)
-    for tm in (33.8, 36.3, 61.8): add(tm, shutter())
+    for tm in (26.5, 27.5, 33.8, 36.3, 46.2, 61.4, 65.3, 69.2): add(tm, shutter())
     for tm in (49.0, 52.0, 55.5): add(tm, whoosh(.5), .3)
     add(56.5, tick(2000, .1), .1); add(56.5, shutter())
     for tm in (62.5, 65.5, 68.5, 63.8, 67.5, 71.4): add(tm, tick(1300, .05), .07)
     for tm in (63.8, 67.7, 71.6): add(tm, whoosh(.6), .3)
     out *= np.minimum(1, np.minimum(np.arange(n) / (1.5 * sr), np.maximum(0, (DUR + .5 - np.arange(n) / sr)) / 3.0))
+    out *= 1.0
     out /= max(1e-6, np.abs(out).max()) / .8
     with wave.open(path, 'wb') as w:
         w.setnchannels(1); w.setsampwidth(2); w.setframerate(sr)
@@ -437,6 +443,10 @@ def main():
         for T in ts:
             Image.frombytes('RGB', (W, H), render_frame(int(T * FPS))).save(f'{pv}/L{T:05.1f}.jpg', quality=88)
         return
+    if '--audio-only' in sys.argv:
+        synth(f'{out}/lens_audio.wav')
+        subprocess.run(['ffmpeg','-y','-loglevel','error','-i',f'{out}/lens_guide_no_voiceover.mp4','-i',f'{out}/lens_audio.wav','-map','0:v','-map','1:a','-c:v','copy','-c:a','aac','-b:a','192k','-shortest','-movflags','+faststart',f'{out}/_remux.mp4'],check=True)
+        os.replace(f'{out}/_remux.mp4', f'{out}/lens_guide_no_voiceover.mp4'); return
     synth(f'{out}/lens_audio.wav')
     N = int(DUR * FPS)
     p = subprocess.Popen(['ffmpeg', '-y', '-loglevel', 'error', '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-s', f'{W}x{H}', '-r', str(FPS), '-i', '-',
