@@ -402,16 +402,11 @@ def synth(path, sfx_only=False):
         nz = rng.standard_normal(m)
         for _ in range(3): nz = np.convolve(nz, np.ones(24) / 24, 'same')
         return nz * np.sin(np.pi * t2 / d) ** 2 * 4
-    def shutter():
-        # DSLR-style: mirror slap (low thump) then two sharp curtain clicks
-        m = int(.34 * sr); t2 = np.arange(m) / sr; s = np.zeros(m)
-        s += np.sin(2 * np.pi * 150 * t2) * np.exp(-t2 / .02) * .9
-        for o, g in ((0.0, 1.0), (.075, .75)):
-            mk = t2 >= o
-            nz = np.diff(rng.standard_normal(m + 1))[:m]
-            s += mk * nz * np.exp(-(t2 - o) / .006) * g * .9
-            s += mk * np.sin(2 * np.pi * 2600 * (t2 - o)) * np.exp(-(t2 - o) / .01) * g * .35
-        return s * .55
+    _raw = subprocess.run(['ffmpeg', '-v', 'error', '-i', f'{HERE}/assets/shutter.mp3', '-f', 'f32le', '-ac', '1', '-ar', str(sr), '-'],
+                          capture_output=True, check=True).stdout
+    _sh = np.frombuffer(_raw, np.float32).copy()
+    _sh /= max(1e-6, np.abs(_sh).max())
+    def shutter(): return _sh * .9
     t = 6.0
     while t < DUR - 3 and not sfx_only:
         lvl = 1.0 if t < DUR - 6 else .6
