@@ -8,7 +8,11 @@ import math, os, sys, subprocess, wave
 from multiprocessing import Pool
 import numpy as np
 from PIL import Image, ImageDraw
-from build import font, FB, FR, ease, clamp, ar_text, HERE
+from build import ease, clamp, ar_text, HERE
+from PIL import ImageFont
+FB = f'{HERE}/assets/fonts/Tajawal-Bold.ttf'
+FR = f'{HERE}/assets/fonts/Tajawal-Medium.ttf'
+def font(p, s): return ImageFont.truetype(p, int(s * 1.14))
 
 W, H, FPS, DUR = 1080, 1920, 30, 80.0
 BGC = (18, 18, 18)
@@ -119,8 +123,8 @@ def card(c, y, main, sub, t0, h=124):
     yy = y + int((1 - p) * 50)
     c.d.rounded_rectangle([x0, yy, x1, yy + h], 22, fill=(255, 255, 255, int(20 * p)), outline=(255, 255, 255, int(46 * p)), width=2)
     c.d.rounded_rectangle([x1 - 10, yy + 18, x1 - 2, yy + h - 18], 4, fill=COPPER + (int(255 * p),))
-    txt(c, yy + (44 if sub else h // 2), main, 42, WHITE, p, x=x1 - 40, anchor='rm')
-    if sub: txt(c, yy + 92, sub, 30, COPPER, p, bold=False, x=x1 - 40, anchor='rm')
+    txt(c, yy + (int(h * .36) if sub else h // 2), main, 42, WHITE, p, x=x1 - 40, anchor='rm')
+    if sub: txt(c, yy + int(h * .76), sub, 30, COPPER, p, bold=False, x=x1 - 40, anchor='rm')
 
 def chip(c, x, y, s, t0, col=COPPER, size=28):
     p = rv(c.T, t0, .4)
@@ -216,7 +220,7 @@ def scene2(c):
 def scene3(c):
     t = c.T - 25
     title(c, 2, 'حدد هدفك', 25)
-    pw, ph, px = 880, 420, 100
+    pw, ph, px = 720, 480, 180
     imc = IM['creek_edit']
     crop = (1300 / 2576 * 2576, 0, 0, 0)
     # panels
@@ -228,21 +232,21 @@ def scene3(c):
     if 17.5 <= t < 19.0: z = 0
     if t >= 19.0: z = ease((t - 19.0) / 3.5) if t < 25 else 1 - ease((t - 25) / 3.5)
     bot, bv = box_view(imc, pw, ph, .5 + (cxf - .5) * z, .5 + (cyf - .5) * z, 1 + (zoom_t - 1) * z)
-    if a1 > 0: rounded_paste(c.cv, top, px, 470 + int((1 - a1) * 40), 28, a1)
-    if a2 > 0: rounded_paste(c.cv, bot, px, 920 + int((1 - a2) * 40), 28, a2)
-    chip(c, px + 20, 490, 'WIDE  16–35mm', 27.0, TEAL)
-    chip(c, px + 20, 940, 'TELE  70–200mm', 28.0, COPPER)
+    if a1 > 0: rounded_paste(c.cv, top, px, 460 + int((1 - a1) * 40), 28, a1)
+    if a2 > 0: rounded_paste(c.cv, bot, px, 965 + int((1 - a2) * 40), 28, a2)
+    chip(c, px + 20, 480, 'WIDE  16–35mm', 27.0, TEAL)
+    chip(c, px + 20, 985, 'TELE  70–200mm', 28.0, COPPER)
     # crop rectangle on the top panel showing the telephoto framing
     if t > 4.0 and z > 0:
         s_top = max(pw / imc.width, ph / imc.height)
         offx = (imc.width * s_top - pw) / 2; offy = (imc.height * s_top - ph) / 2
         _, (bx, by, bw, bh) = box_view(imc, pw, ph, cxf, cyf, zoom_t)
-        rx0 = px + bx * s_top - offx; ry0 = 470 + by * s_top - offy
+        rx0 = px + bx * s_top - offx; ry0 = 460 + by * s_top - offy
         c.d.rectangle([rx0, ry0, rx0 + bw * s_top, ry0 + bh * s_top], outline=COPPER + (int(255 * z),), width=4)
     if t > 12.5 and t < 14.0 or (17.5 <= t < 18.8):
         pass
-    card(c, 1385, 'هل تبحث عن مشهد واسع؟', '(Landscape)', 29.5, h=104)
-    card(c, 1510, 'أم عزل التفاصيل الدقيقة؟', '(Portrait / Details)', 35.0, h=104)
+    card(c, 1470, 'هل تبحث عن مشهد واسع؟', '(Landscape)', 29.5, h=92)
+    card(c, 1572, 'أم عزل التفاصيل الدقيقة؟', '(Portrait / Details)', 35.0, h=92)
 
 def card_item(c, x, scale, a, k, active, near=True):
     names = [('16–35mm', 'المناظر والمساحات', IM['creek_edit'], (.5, .5, 1.0)),
