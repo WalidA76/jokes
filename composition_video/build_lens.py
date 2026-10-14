@@ -374,7 +374,7 @@ def render_frame(i):
     return out.tobytes()
 
 # ------------------------------------------------------------------- audio
-def synth(path):
+def synth(path, sfx_only=False):
     sr = 44100; n = int((DUR + 1) * sr)
     out = np.zeros(n, np.float32); rng = np.random.default_rng(3)
     def add(t, sig, g=1.):
@@ -386,7 +386,7 @@ def synth(path):
     env = np.minimum(1, np.minimum(tt / 1.5, (6.4 - tt) / 1.5)) ** 1.5
     for k, c0 in enumerate(range(0, int(DUR) + 1, 6)):
         sig = sum(np.sin(2 * np.pi * f * tt + .4 * np.sin(2 * np.pi * .25 * tt + j)) / (1 + j * .3) for j, f in enumerate(chords[k % 4])) * env
-        add(c0, sig, .05)
+        if not sfx_only: add(c0, sig, .05)
     beat = 60 / 80
     def kick():
         m = int(.28 * sr); t2 = np.arange(m) / sr
@@ -413,7 +413,7 @@ def synth(path):
             s += mk * np.sin(2 * np.pi * 2600 * (t2 - o)) * np.exp(-(t2 - o) / .01) * g * .35
         return s * .55
     t = 6.0
-    while t < DUR - 3:
+    while t < DUR - 3 and not sfx_only:
         lvl = 1.0 if t < DUR - 6 else .6
         add(t, kick(), .16 * lvl)
         add(t + beat / 2, hat(), .05 * lvl)
@@ -442,6 +442,13 @@ def main():
         ts = [float(x) for x in sys.argv[sys.argv.index('--preview') + 1:]] or [4, 8, 13, 22, 30, 40, 52, 58, 64, 70, 77]
         for T in ts:
             Image.frombytes('RGB', (W, H), render_frame(int(T * FPS))).save(f'{pv}/L{T:05.1f}.jpg', quality=88)
+        return
+    if '--music' in sys.argv:
+        m = f'{HERE}/assets/music.mp3'
+        synth(f'{out}/lens_sfx.wav', sfx_only=True)
+        subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-i', f'{out}/lens_video_only.mp4', '-i', m, '-i', f'{out}/lens_sfx.wav', '-filter_complex',
+            f'[1:a]atrim=0:{DUR},asetpts=PTS-STARTPTS,afade=t=in:d=1.5,afade=t=out:st={DUR-3.5}:d=3.5,volume=0.95[mu];[2:a]volume=0.9[fx];[mu][fx]amix=inputs=2:normalize=0:duration=first,alimiter=limit=0.95[a]',
+            '-map', '0:v', '-map', '[a]', '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k', '-t', str(DUR), '-movflags', '+faststart', f'{out}/lens_guide_with_music.mp4'], check=True)
         return
     if '--audio-only' in sys.argv:
         synth(f'{out}/lens_audio.wav')
