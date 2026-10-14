@@ -2,3 +2,5 @@ composition_video/out/audio.wav
 composition_video/preview/
 composition_video/render.log
 __pycache__/
+composition_video/out/lens_audio.wav
+composition_video/render_lens.log
