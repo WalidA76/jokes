@@ -22,3 +22,7 @@
 - `assets/afon_vo.mp3` — user's recorded Arabic narration (68.6 s). Final: `out/afon_with_voiceover.mp4`.
 - Scenes are time-warped to the narration (`WARP` in build_afon.py); music auto-ducks −14 dB under speech, SFX −5 dB (`python3 build_afon.py` then `--vo`).
 - `out/afon_no_vo_music.mp4` = earlier version without narration.
+
+## Inquiries intro (follower comments)
+- assets/inq_post.jpg / inq_c1.jpg / inq_c2.jpg = user's post + 2 follower comments. Shown at T_out 2.0–10.2 s over the dimmed camera (see `inquiries()` in build_afon.py).
+- Assumed from the user: inquiries start at s=2; comment boundaries taken from VO pauses (3.84, 6.59, 10.25). Follower comments are re-typeset (no names/avatars).

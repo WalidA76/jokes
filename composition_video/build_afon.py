@@ -16,7 +16,7 @@ from build_lens import (Ctx, rv, txt, chip, card, rounded_paste, box_view, ss, f
 DUR = 76.0
 # Output-time -> internal-timeline anchors, tuned to the recorded voice-over (assets/afon_vo.mp3):
 # (T_out seconds, T_in seconds). Identity if the file is absent.
-WARP = [(0, 0), (15.3, 16.0), (17.8, 22.0), (23.3, 29.0), (31.5, 36.0), (39.3, 45.5), (46.5, 53.0), (55.0, 59.0), (62.8, 64.0), (76.0, 76.0)]
+WARP = [(0, 0), (2.0, 2.0), (10.0, 2.5), (11.0, 5.0), (11.3, 5.6), (12.5, 7.3), (12.7, 7.7), (14.7, 12.9), (15.3, 16.0), (17.8, 22.0), (23.3, 29.0), (31.5, 36.0), (39.3, 45.5), (46.5, 53.0), (55.0, 59.0), (62.8, 64.0), (76.0, 76.0)]
 def tin(T): return float(np.interp(T, [a for a, b in WARP], [b for a, b in WARP]))
 def tout(T): return float(np.interp(T, [b for a, b in WARP], [a for a, b in WARP]))
 RED = (232, 40, 52)
@@ -429,14 +429,76 @@ def scene4(c):
     a = rv(t, 70.3, .7) * (1 - rv(t, 72.4, .4))
     c.d.text((W // 2, 1680), 'Walidphotoz', font=font(FB, 52), fill=WHITE + (int(255 * a),), anchor='mm')
 
+# ------------------------------------------------------- inquiries (post + follower comments)
+POST_IMG = Image.open(f'{HERE}/assets/inq_post.jpg').convert('RGB')
+POST_IMG = POST_IMG.crop((0, 0, POST_IMG.width, int(POST_IMG.height * .928)))      # drop the owner-only insights/boost bar
+COMMENTS = [(['وين القى اعدادته في كانون ارف فايف'], 3.84, 150), (['كاميرتي كانون ار ثمانية لكن لم نجد شرح', 'يوضح لنا كيفية استخدامه'], 6.59, 215)]
+
+def paste_ov(c, im, x, y, r, a=1.0, glow=0.0):
+    mask = Image.new('L', im.size, 0)
+    ImageDraw.Draw(mask).rounded_rectangle([0, 0, im.width - 1, im.height - 1], r, fill=int(255 * a))
+    if glow > 0:
+        pad = 26
+        g = Image.new('RGBA', (im.width + 2 * pad, im.height + 2 * pad), (0, 0, 0, 0))
+        ImageDraw.Draw(g).rounded_rectangle([pad - 6, pad - 6, im.width + pad + 6, im.height + pad + 6], r + 6, fill=COPPER + (int(120 * glow * a),))
+        g = g.filter(ImageFilter.GaussianBlur(18))
+        c.ov.alpha_composite(g, dest=(int(x) - pad, int(y) - pad))
+    c.ov.paste(im, (int(x), int(y)), mask)
+
+def comment_bubble(c, To, lines, t0, h, y, out):
+    p = rv(To, t0, .55) * out
+    if p <= 0: return
+    w = 900
+    lay = Image.new('RGBA', (w, h), (0, 0, 0, 0)); d = ImageDraw.Draw(lay)
+    d.rounded_rectangle([0, 0, w - 1, h - 1], 34, fill=(30, 30, 35, 245), outline=(255, 255, 255, 60), width=2)
+    d.rounded_rectangle([w - 14, 26, w - 4, h - 26], 5, fill=COPPER + (255,))
+    # avatar placeholder (no names / faces of followers)
+    cx, cy = w - 90, 62
+    d.ellipse([cx - 34, cy - 34, cx + 34, cy + 34], fill=(60, 62, 70, 255))
+    d.ellipse([cx - 12, cy - 22, cx + 12, cy + 2], fill=(150, 152, 160, 255))
+    d.pieslice([cx - 24, cy + 2, cx + 24, cy + 50], 180, 360, fill=(150, 152, 160, 255))
+    ar_text(d, (w - 150, 40), 'تعليق من متابع', font(FR, 26), (255, 150, 90, 255), 'rm')
+    for i, ln in enumerate(lines):
+        ar_text(d, (w - 40, 112 + i * 54 if len(lines) > 1 else 112), ln, font(FB, 40), (255, 255, 255, 255), 'rm')
+    d.ellipse([34, h - 52, 60, h - 26], fill=(255, 255, 255, 40))
+    sc = .92 + .08 * p
+    lay2 = lay.resize((int(w * sc), int(h * sc)), Image.BICUBIC)
+    lay2.putalpha(lay2.getchannel('A').point(lambda v: int(v * p)))
+    c.ov.alpha_composite(lay2, dest=(int((W - lay2.width) / 2), int(y + (h - lay2.height) / 2 + (1 - p) * 30)))
+
+def inquiries(c, To):
+    out = 1 - rv(To, 9.8, .4)
+    a_in = rv(To, 1.8, .6)
+    if To < 1.8 or out <= 0: return
+    c.ov.alpha_composite(Image.new('RGBA', (W, H), (8, 8, 10, int(205 * a_in * out))))
+    # headline
+    hp = rv(To, 2.1, .6) * out
+    txt(c, 255, 'وصلتني استفسارات كثيرة', 46, WHITE, hp, dy=int((1 - hp) * 24))
+    c.d.line([(W // 2 - 80, 300), (W // 2 + 80, 300)], fill=COPPER + (int(220 * hp),), width=4)
+    # post card: slides in, then shrinks upward
+    pe = ease((To - 2.0) / .8)
+    sh = ease((To - 3.84) / .75)
+    pw = int(640 - 230 * sh)
+    ph = int(pw * POST_IMG.height / POST_IMG.width)
+    cy = 840 - 250 * sh + (1 - pe) * 160
+    im = POST_IMG.resize((pw, ph), Image.LANCZOS)
+    paste_ov(c, im, (W - pw) // 2, cy - ph / 2 + 40, 26, pe * out, glow=1.0 - .4 * sh)
+    for txt_, t0, h in COMMENTS:
+        pass
+    y1 = 960
+    comment_bubble(c, To, COMMENTS[0][0], COMMENTS[0][1], COMMENTS[0][2], y1, out)
+    comment_bubble(c, To, COMMENTS[1][0], COMMENTS[1][1], COMMENTS[1][2], y1 + COMMENTS[0][2] + 40, out)
+
 # ------------------------------------------------------------- frame
 def render_frame(i):
-    T = tin(i / FPS)
+    To = i / FPS
+    T = tin(To)
     c = Ctx(T)
     if T < 16: scene1(c)
     elif T < 36: scene2(c)
     elif T < 64.4: scene3(c)
     else: scene4(c)
+    if To < 10.4: inquiries(c, To)
     out = c.cv.convert('RGBA'); out.alpha_composite(c.ov); out = out.convert('RGB')
     for edge in (16, 36, 64.4):
         dd = abs(T - edge)
@@ -481,6 +543,12 @@ def synth_sfx(path):
         return np.convolve(s, np.ones(6) / 6, 'same') * np.sin(np.pi * t2 / d) ** .6
     def chime():
         t2 = tt(.5); return (np.sin(2 * np.pi * 1318 * t2) + .5 * np.sin(2 * np.pi * 1975 * t2)) * np.exp(-t2 * 7)
+    def add_out(t, sig, g=1.):
+        i = int(t * sr)
+        if 0 <= i < n: sig = sig[:n - i]; out[i:i + len(sig)] += (sig * g).astype(np.float32)
+    add_out(2.0, whoosh(.6), .35); add_out(3.9, whoosh(.4), .3)
+    for tp in (4.3, 6.9): add_out(tp, chime(), .3); add_out(tp + .12, beep(1800, .06), .15)
+    add_out(9.9, whoosh(.5), .3)
     add(.3, bass_drop(), .5); add(1.0, whoosh(1.0), .4); add(2.5, whoosh(.9), .4)
     add(5.0, tactile(), .35); add(5.35, sh, .8); add(5.5, beep(), .22)
     add(7.8, whoosh(.7), .35); add(8.4, whoosh(.9), .3); add(13.2, tick(), .25)
