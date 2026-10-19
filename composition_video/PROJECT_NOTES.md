@@ -17,3 +17,8 @@
 - Used the approved music.mp3 + shutter.mp3 (user confirmed reuse for this video).
 - Photos supplied by the user: assets/afon_*.png (Canon menu, bird, runner, tripod) + lens_souk_raw.jpg (street).
 - Pexels/Pixabay/Unsplash image hosts are blocked from the sandbox — B-roll must come from the user.
+
+## Video 3 with the user's voice-over
+- `assets/afon_vo.mp3` — user's recorded Arabic narration (68.6 s). Final: `out/afon_with_voiceover.mp4`.
+- Scenes are time-warped to the narration (`WARP` in build_afon.py); music auto-ducks −14 dB under speech, SFX −5 dB (`python3 build_afon.py` then `--vo`).
+- `out/afon_no_vo_music.mp4` = earlier version without narration.

@@ -14,6 +14,11 @@ from build_lens import (Ctx, rv, txt, chip, card, rounded_paste, box_view, ss, f
                         COPPER, TEAL, WHITE, GREY, W, H, FPS, HERE)
 
 DUR = 76.0
+# Output-time -> internal-timeline anchors, tuned to the recorded voice-over (assets/afon_vo.mp3):
+# (T_out seconds, T_in seconds). Identity if the file is absent.
+WARP = [(0, 0), (15.3, 16.0), (17.8, 22.0), (23.3, 29.0), (31.5, 36.0), (39.3, 45.5), (46.5, 53.0), (55.0, 59.0), (62.8, 64.0), (76.0, 76.0)]
+def tin(T): return float(np.interp(T, [a for a, b in WARP], [b for a, b in WARP]))
+def tout(T): return float(np.interp(T, [b for a, b in WARP], [a for a, b in WARP]))
 RED = (232, 40, 52)
 GREEN = (64, 224, 110)
 PANEL = (18, 18, 20)
@@ -426,7 +431,7 @@ def scene4(c):
 
 # ------------------------------------------------------------- frame
 def render_frame(i):
-    T = i / FPS
+    T = tin(i / FPS)
     c = Ctx(T)
     if T < 16: scene1(c)
     elif T < 36: scene2(c)
@@ -449,7 +454,7 @@ def synth_sfx(path):
     sr = 44100; n = int((DUR + 1) * sr)
     out = np.zeros(n, np.float32); rng = np.random.default_rng(11)
     def add(t, sig, g=1.):
-        i = int(t * sr)
+        i = int(tout(t) * sr)
         if i >= n or i < 0: return
         sig = sig[:n - i]; out[i:i + len(sig)] += (sig * g).astype(np.float32)
     raw = subprocess.run(['ffmpeg', '-v', 'error', '-i', f'{HERE}/assets/shutter.mp3', '-f', 'f32le', '-ac', '1', '-ar', str(sr), '-'], capture_output=True, check=True).stdout
@@ -503,6 +508,46 @@ def synth_sfx(path):
         w.setnchannels(1); w.setsampwidth(2); w.setframerate(sr)
         w.writeframes((np.clip(out, -1, 1) * 32767).astype(np.int16).tobytes())
 
+def _decode(path, sr=44100, ch=1, extra=()):
+    raw = subprocess.run(['ffmpeg', '-v', 'error', '-i', path, *extra, '-f', 'f32le', '-ac', str(ch), '-ar', str(sr), '-'], capture_output=True, check=True).stdout
+    return np.frombuffer(raw, np.float32).copy()
+
+def mix_vo(out, duck_db=-14.0, sfx_duck_db=-5.0):
+    """Voice-over + music (auto-ducked under speech) + SFX -> out/afon_with_voiceover.mp4"""
+    sr = 44100; n = int(DUR * sr)
+    vo = _decode(f'{HERE}/assets/afon_vo.mp3')
+    music = _decode(f'{HERE}/assets/music.mp3', ch=2)[: 2 * n].reshape(-1, 2)
+    sfx = _decode(f'{out}/afon_sfx.wav')
+    pad = lambda x: np.pad(x, [(0, max(0, n - len(x)))] + [(0, 0)] * (x.ndim - 1))[:n]
+    vo, music, sfx = pad(vo), pad(music), pad(sfx)
+    # speech envelope: 20 ms RMS -> gate -> attack/release smoothing
+    win = int(.02 * sr); k = len(vo) // win
+    rms = np.sqrt((vo[:k * win].reshape(k, win) ** 2).mean(1) + 1e-12)
+    speech = (20 * np.log10(rms) > -46).astype(np.float32)
+    speech = np.convolve(speech, np.ones(8) / 8, 'same'); speech = (speech > .05).astype(np.float32)   # bridge tiny gaps (~0.16 s)
+    env = np.zeros(k, np.float32); a_up, a_dn = 1 - math.exp(-.02 / .25), 1 - math.exp(-.02 / .8)
+    for i in range(k):
+        prev = env[i - 1] if i else 0
+        env[i] = prev + ((a_up if speech[i] > prev else a_dn) * (speech[i] - prev))
+    t_env = (np.arange(k) + .5) * win / sr
+    env_full = np.interp(np.arange(n) / sr, t_env, env)
+    g = lambda db: 1 - env_full * (1 - 10 ** (db / 20))
+    fade = np.minimum(np.minimum(1, np.arange(n) / (1.5 * sr)), np.clip((DUR - np.arange(n) / sr) / 3.5, 0, 1))
+    music = music * (g(duck_db) * fade * .85)[:, None]
+    sfx = sfx * g(sfx_duck_db) * .9
+    # voice: gentle high-pass + level up
+    voice = vo * 1.9
+    mono = music.mean(1) if False else None
+    mix = music.copy()
+    mix[:, 0] += voice + sfx; mix[:, 1] += voice + sfx
+    peak = np.abs(mix).max(); mix = mix / peak * .95 if peak > .95 else mix
+    with wave.open(f'{out}/afon_mix.wav', 'wb') as w:
+        w.setnchannels(2); w.setsampwidth(2); w.setframerate(sr)
+        w.writeframes((np.clip(mix, -1, 1) * 32767).astype(np.int16).tobytes())
+    subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-i', f'{out}/_afon_v.mp4', '-i', f'{out}/afon_mix.wav', '-map', '0:v', '-map', '1:a',
+                    '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k', '-t', str(DUR), '-movflags', '+faststart', f'{out}/afon_with_voiceover.mp4'], check=True)
+    print('ducking: speech coverage %.0f%%' % (100 * speech.mean()))
+
 def main():
     out = f'{HERE}/out'; os.makedirs(out, exist_ok=True)
     if '--preview' in sys.argv:
@@ -511,6 +556,8 @@ def main():
         for T in ts:
             Image.frombytes('RGB', (W, H), render_frame(int(T * FPS))).save(f'{pv}/A{T:05.1f}.jpg', quality=88)
         return
+    if '--vo' in sys.argv:
+        mix_vo(out); return
     if '--mux' in sys.argv:
         m = f'{HERE}/assets/music.mp3'
         subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-i', f'{out}/_afon_v.mp4', '-i', m, '-i', f'{out}/afon_sfx.wav', '-filter_complex',
