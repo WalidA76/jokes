@@ -26,3 +26,7 @@
 ## Inquiries intro (follower comments)
 - assets/inq_post.jpg / inq_c1.jpg / inq_c2.jpg = user's post + 2 follower comments. Shown at T_out 2.0–10.2 s over the dimmed camera (see `inquiries()` in build_afon.py).
 - Assumed from the user: inquiries start at s=2; comment boundaries taken from VO pauses (3.84, 6.59, 10.25). Follower comments are re-typeset (no names/avatars).
+
+## Workshop (أساسيات التصوير) — 16:9 graphics + recording script
+- Source PDF: «دليل ورشة أساسيات التصوير الفوتوغرافي». Script: workshop/workshop_recording_script.docx (+ .pdf). Content: workshop/script_content.js.
+- Graphics (1920x1080, 30fps, silent): workshop/out/01..06_*.mp4 — code: workshop/build_workshop.py (`python3 build_workshop.py m1 m2 ...`).
